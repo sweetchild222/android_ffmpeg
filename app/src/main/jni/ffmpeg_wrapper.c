@@ -57,7 +57,7 @@ JNIEXPORT jint JNICALL Java_com_skt_ffmpeg_ndk_progress(JNIEnv *env, jobject obj
 }
 
 
-JNIEXPORT jint JNICALL Java_com_skt_ffmpeg_ndk_merge(JNIEnv *env, jobject object, jstring videoPath, jstring bgmPath, jstring micPath, jstring outPath, jboolean log)
+JNIEXPORT jint JNICALL Java_com_skt_ffmpeg_ndk_merge3(JNIEnv *env, jobject object, jstring videoPath, jstring micPath, jstring bgmPath, jstring outPath, jboolean log)
 {
     const char* nativeVideoPath = (*env)->GetStringUTFChars( env, videoPath , NULL);
     const char* nativeBGMPath = (*env)->GetStringUTFChars( env, bgmPath, NULL);
@@ -89,7 +89,44 @@ JNIEXPORT jint JNICALL Java_com_skt_ffmpeg_ndk_merge(JNIEnv *env, jobject object
     (*env)->ReleaseStringUTFChars(env, videoPath, nativeVideoPath);
     (*env)->ReleaseStringUTFChars(env, bgmPath, nativeBGMPath);
     (*env)->ReleaseStringUTFChars(env, micPath, nativeMICPath);
-    (*env)->ReleaseStringUTFChars(env, micPath, nativeOutput);
+    (*env)->ReleaseStringUTFChars(env, outPath, nativeOutput);
+
+    return result;
+}
+
+
+
+JNIEXPORT jint JNICALL Java_com_skt_ffmpeg_ndk_merge2(JNIEnv *env, jobject object, jstring videoPath, jstring micPath, jstring outPath, jboolean log)
+{
+    const char* nativeVideoPath = (*env)->GetStringUTFChars( env, videoPath , NULL);
+    const char* nativeMICPath = (*env)->GetStringUTFChars( env, micPath, NULL);
+    const char* nativeOutput = (*env)->GetStringUTFChars( env, outPath, NULL);
+
+    void* handle = dlopen("libffmpeg.so", RTLD_NOW);
+
+    jint result = -1;
+
+    if(handle){
+
+        progress = 0;
+
+        int *(*ffmpeg)(int argc, char **argv, void(*callback)(void *, int, const char *, va_list)) = dlsym(handle, "ffmpeg");
+
+        if(ffmpeg != 0)  {
+
+             const int argc = 12;
+             logEnable = log;
+
+             char *argv[argc] = {"ffmpeg", "-i", nativeVideoPath, "-i", nativeMICPath, "-vcodec", "copy", "-c:a", "aac", "-strict", "experimental",  nativeOutput};
+             result = ffmpeg(argc, argv, log_callback);
+        }
+
+        dlclose(handle);
+    }
+
+    (*env)->ReleaseStringUTFChars(env, videoPath, nativeVideoPath);
+    (*env)->ReleaseStringUTFChars(env, micPath, nativeMICPath);
+    (*env)->ReleaseStringUTFChars(env, outPath, nativeOutput);
 
     return result;
 }
