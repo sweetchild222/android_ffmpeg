@@ -1,0 +1,10 @@
+1. unzip android-ndk-r15c-linux-x86_64.zip
+2. tar -xvf ffmpeg-3.2.12.tar.bz2
+3. cd android-ndk-r15c
+3. export NDK=$(pwd)
+4. cd ../ffmpeg-3.2.12
+4. /configure --prefix=$(pwd)/android/arm --cross-prefix=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi- --target-os=android --cpu=armv5te --arch=arm --disable-asm --enable-armv5te --disable-stripping --extra-cflags="-O3 -Wall -pipe -std=c99 -ffast-math -fstrict-aliasing -Werror=strict-aliasing -Wno-psabi -Wa,--noexecstack -DANDROID -DNDEBUG-march=armv5te -mtune=arm9tdmi -msoft-float" --sysroot=$NDK/platforms/android-19/arch-arm/ --enable-shared --disable-static
+5. make
+6. make install
+7. cd android
+8. tar cvzf arm.tar.gz arm
